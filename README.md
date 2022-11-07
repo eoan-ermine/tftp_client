@@ -1,2 +1,2 @@
 # tftp-client
-Trivial File Transport Protocol client
+Trivial File Transfer Protocol client
