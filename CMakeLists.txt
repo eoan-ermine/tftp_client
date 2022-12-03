@@ -2,4 +2,7 @@ cmake_minimum_required (VERSION 3.5)
 
 project(tftp_client)
 
-add_executable(tftp_server tftp_client/main.cpp)
+find_package(Boost 1.74 COMPONENTS program_options REQUIRED)
+
+add_executable(tftp_client tftp_client/main.cpp)
+target_link_libraries(tftp_client Boost::program_options)
