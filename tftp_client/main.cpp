@@ -1,7 +1,10 @@
 #include <boost/program_options.hpp>
+#include <boost/asio.hpp>
 
+#include "client.hpp"
 #include <iostream>
 
+using boost::asio::ip::udp;
 namespace po = boost::program_options;
 
 namespace tftp_client {
@@ -51,5 +54,22 @@ int main(int argc, char* argv[]) {
 	if (vm.count("help")) {
 		std::cout << desc << '\n';
 		return 0;
+	}
+
+	try {
+		boost::asio::io_context io_context;
+		udp::resolver resolver(io_context);
+		udp::endpoint receiver_endpoint =
+			*resolver.resolve(udp::v4(), host, "69").begin();
+
+		udp::socket socket(io_context);
+		socket.open(udp::v4());
+		tftp_client::TFTPClient client(receiver_endpoint, socket);
+
+		if (method == tftp_client::method::PUT) {
+			client.send(source, destination, "binary");
+		}
+	} catch (std::exception& e) {
+		std::cerr << e.what() << std::endl;
 	}
 }
