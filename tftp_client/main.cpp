@@ -71,5 +71,8 @@ int main(int argc, char* argv[]) {
 		}
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
+	} catch (tftp_common::packets::error& err) {
+		std::cout << "Unexpected error: code = " << err.ErrorCode << ", message = " << err.ErrMsg << '\n';
+		return 1;
 	}
 }
