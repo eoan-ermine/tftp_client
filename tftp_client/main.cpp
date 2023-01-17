@@ -25,8 +25,9 @@ std::istream& operator>>(std::istream& stream, method& object) {
 }
 
 int main(int argc, char* argv[]) {
-	if (argc <= 1) {
+	if (argc <= 4) {
 		std::cout << "Usage: tftp_client host [GET | PUT] source [destination]" << '\n';
+		return 1;
 	}
 
 	std::string host, source, destination;
