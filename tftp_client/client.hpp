@@ -25,6 +25,7 @@ bool try_parse(Iterator begin, Iterator end, Packet& packet, ParseFunction parse
 }
 
 class TFTPClient {
+	udp::resolver& resolver;
 	udp::endpoint& receiver_endpoint;
 	udp::endpoint sender_endpoint;
 	udp::socket& socket;
@@ -32,7 +33,7 @@ class TFTPClient {
 	std::vector<unsigned char> recv_buffer = std::vector<unsigned char>(1024);
 
 public:
-	TFTPClient(udp::endpoint& receiver_endpoint, udp::socket& socket): receiver_endpoint(receiver_endpoint), socket(socket) { }
+	TFTPClient(udp::resolver& resolver, udp::endpoint& receiver_endpoint, udp::socket& socket): resolver(resolver), receiver_endpoint(receiver_endpoint), socket(socket) { }
 
 	void send(std::string fromPath, std::string toPath, std::string transferMode) {
 		std::ifstream file{fromPath};
@@ -44,6 +45,9 @@ public:
 		}, send_buffer.begin());
 		socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
 		std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
+
+		std::string new_port = std::to_string(sender_endpoint.port());
+		receiver_endpoint = *resolver.resolve(udp::v4(), receiver_endpoint.address().to_string(), new_port).begin();
 
 		tftp_common::packets::ack acknowledgment_packet;
 		while (file && !file.eof()) {
@@ -81,6 +85,11 @@ public:
 				return tftp_common::parsers::parse_data_packet(begin, end, packet);
 			});
 			file.write(reinterpret_cast<char*>(data_packet.data.data()), data_packet.data.size());
+
+			if (receiver_endpoint.port() != sender_endpoint.port()) {
+				std::string new_port = std::to_string(sender_endpoint.port());
+				receiver_endpoint = *resolver.resolve(udp::v4(), receiver_endpoint.address().to_string(), new_port).begin();
+			}
 
 			std::size_t packet_size = tftp_common::serialize(tftp_common::packets::ack {
 				.block = data_packet.block

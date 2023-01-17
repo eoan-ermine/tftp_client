@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 
 		udp::socket socket(io_context);
 		socket.open(udp::v4());
-		tftp_client::TFTPClient client(receiver_endpoint, socket);
+		tftp_client::TFTPClient client(resolver, receiver_endpoint, socket);
 
 		if (method == tftp_client::method::PUT) {
 			client.send(source, destination, "octet");
