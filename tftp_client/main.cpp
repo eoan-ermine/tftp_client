@@ -67,9 +67,9 @@ int main(int argc, char* argv[]) {
 		tftp_client::TFTPClient client(receiver_endpoint, socket);
 
 		if (method == tftp_client::method::PUT) {
-			client.send(source, destination, "binary");
-		} else {
-			client.read(source, destination, "binary");
+			client.send(source, destination, "octet");
+		} else if (method == tftp_client::method::GET) {
+			client.read(source, destination, "octet");
 		}
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
