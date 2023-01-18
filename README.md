@@ -32,3 +32,4 @@ tftp_client host [GET | PUT] source [destination]
 | [RFC 2347: TFTP Option Extension](https://www.rfc-editor.org/rfc/rfc2347) | ${\color{red}\text{Не реализовано}}$ |
 | [RFC 2348: TFTP Blocksize Option](https://www.rfc-editor.org/rfc/rfc2347) | ${\color{red}\text{Не реализовано}}$ |
 | [RFC 2349: TFTP Timeout Interval and Transfer Size Options](https://www.rfc-editor.org/rfc/rfc2347) | ${\color{red}\text{Не реализовано}}$ |
+| [RFC 7440: TFTP Windowsize Option](https://www.rfc-editor.org/rfc/rfc7440) | ${\color{red}\text{Не реализовано}}$ |
