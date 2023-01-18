@@ -2,7 +2,9 @@
 #include <boost/asio.hpp>
 
 #include "client.hpp"
+
 #include <iostream>
+#include <cstdlib>
 
 using boost::asio::ip::udp;
 namespace po = boost::program_options;
@@ -27,7 +29,7 @@ std::istream& operator>>(std::istream& stream, method& object) {
 int main(int argc, char* argv[]) {
 	if (argc <= 4) {
 		std::cout << "Usage: tftp_client host [GET | PUT] source [destination]" << '\n';
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string host, source, destination;
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]) {
 
 	if (vm.count("help")) {
 		std::cout << desc << '\n';
-		return 0;
+		return EXIT_SUCCESS;
 	}
 
 	try {
@@ -72,10 +74,13 @@ int main(int argc, char* argv[]) {
 		} else if (method == tftp_client::method::GET) {
 			client.read(source, destination, "octet");
 		}
+
+		return EXIT_SUCCESS;
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	} catch (tftp_common::packets::error& err) {
 		std::cout << "Unexpected error: code = " << err.ErrorCode << ", message = " << err.ErrMsg << '\n';
-		return 1;
 	}
+
+	return EXIT_FAILURE;
 }
