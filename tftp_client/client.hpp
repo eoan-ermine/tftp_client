@@ -62,7 +62,7 @@ public:
 				.data = std::move(data_buffer)
 			}, send_buffer.begin());
 			socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
-			socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
+			bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 		}
 	}
 
@@ -75,24 +75,23 @@ public:
 			.mode = transferMode
 		}, send_buffer.begin());
 		socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
+		std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
+
+		std::string new_port = std::to_string(sender_endpoint.port());
+		receiver_endpoint = *resolver.resolve(udp::v4(), receiver_endpoint.address().to_string(), new_port).begin();
 
 		tftp_common::packets::data data_packet;
 		do {
-			std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 			try_parse(recv_buffer.begin(), recv_buffer.begin() + bytesRead, data_packet, [](auto begin, auto end, auto& packet) {
 				return tftp_common::parsers::parse_data_packet(begin, end, packet);
 			});
 			file.write(reinterpret_cast<char*>(data_packet.data.data()), data_packet.data.size());
 
-			if (receiver_endpoint.port() != sender_endpoint.port()) {
-				std::string new_port = std::to_string(sender_endpoint.port());
-				receiver_endpoint = *resolver.resolve(udp::v4(), receiver_endpoint.address().to_string(), new_port).begin();
-			}
-
 			std::size_t packet_size = tftp_common::serialize(tftp_common::packets::ack {
 				.block = data_packet.block
 			}, send_buffer.begin());
 			socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
+			bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 		} while (data_packet.data.size() == 512) ;
 	}
 };
