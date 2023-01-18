@@ -1,5 +1,19 @@
 # TFTP Client
 
+## Использование
+
+```
+tftp_client host [GET | PUT] source [destination]
+```
+
+| | |
+| ----------- | ------------------------------------------------------------------------------ |
+| host | Specifies the local or remote host |
+| GET | Transfers the file source on the remote host to the file destination on the local host |
+| PUT | Transfers the file source on the local host to the file destination on the remote host |
+| source | Specifies the file to transfer |
+| destination | Specifies where to transfer the file |
+
 ## Реализованные возможности ([RFC 1350](https://tools.ietf.org/html/rfc1350))
 
 | Возможность | Статус реализации |
