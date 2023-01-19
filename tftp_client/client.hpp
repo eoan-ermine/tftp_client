@@ -81,7 +81,7 @@ public:
 		receiver_endpoint = *resolver.resolve(udp::v4(), receiver_endpoint.address().to_string(), new_port).begin();
 
 		tftp_common::packets::data data_packet;
-		do {
+		while (true) {
 			try_parse(recv_buffer.begin(), recv_buffer.begin() + bytesRead, data_packet, [](auto begin, auto end, auto& packet) {
 				return tftp_common::parsers::parse_data_packet(begin, end, packet);
 			});
@@ -91,8 +91,11 @@ public:
 				.block = data_packet.block
 			}, send_buffer.begin());
 			socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
+
+			if (data_packet.data.size() != 512) break;
+
 			bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
-		} while (data_packet.data.size() == 512) ;
+		}
 	}
 };
 
