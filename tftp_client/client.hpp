@@ -48,19 +48,32 @@ public:
 		receiver_endpoint = *resolver.resolve(udp::v4(), receiver_endpoint.address().to_string(), new_port).begin();
 
 		tftp_common::packets::ack acknowledgment_packet;
+		tftp_common::packets::data current_packet;
+		uint16_t current_block = 0;
+
 		while (file && !file.eof()) {
 			try_parse(recv_buffer.begin(), recv_buffer.begin() + bytesRead, acknowledgment_packet, [](auto begin, auto end, auto& packet) {
 				return tftp_common::parsers::parse_ack_packet(begin, end, packet);
 			});
 
 			std::vector<unsigned char> data_buffer(512);
-			file.read(reinterpret_cast<char*>(data_buffer.data()), 512);
-			data_buffer.resize(file.gcount());
+			std::size_t packet_size;
 
-			std::size_t packet_size = tftp_common::serialize({
-				.block = static_cast<uint16_t>(acknowledgment_packet.block + 1),
-				.data = std::move(data_buffer)
-			}, send_buffer.begin());
+			/*
+				Новый пакет данных следует формировать лишь в том случае, если
+				предыдущий был отправлен успешно, иначе следует отправлять прошлый
+				пакет данных
+			*/
+			if (acknowledgment_packet.block == current_block) {
+				current_block += 1;
+
+				file.read(reinterpret_cast<char*>(data_buffer.data()), 512);
+				data_buffer.resize(file.gcount());
+				packet_size = tftp_common::serialize({
+					.block = current_block, .data = std::move(data_buffer)
+				}, send_buffer.begin());
+			}
+
 			socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
 			bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 		}
@@ -81,19 +94,31 @@ public:
 		receiver_endpoint = *resolver.resolve(udp::v4(), receiver_endpoint.address().to_string(), new_port).begin();
 
 		tftp_common::packets::data data_packet;
+		uint16_t current_block = 1;
+
 		while (true) {
 			try_parse(recv_buffer.begin(), recv_buffer.begin() + bytesRead, data_packet, [](auto begin, auto end, auto& packet) {
 				return tftp_common::parsers::parse_data_packet(begin, end, packet);
 			});
-			file.write(reinterpret_cast<char*>(data_packet.data.data()), data_packet.data.size());
 
-			std::size_t packet_size = tftp_common::serialize(tftp_common::packets::ack {
-				.block = data_packet.block
-			}, send_buffer.begin());
+			std::size_t packet_size;
+
+			/*
+				Новый пакет данных следует формировать лишь в том случае, если
+				предыдущий был отправлен успешно, иначе следует отправлять прошлый
+				пакет данных
+			*/
+			if (data_packet.block == current_block) {
+				current_block += 1;
+
+				file.write(reinterpret_cast<char*>(data_packet.data.data()), data_packet.data.size());
+				packet_size = tftp_common::serialize(tftp_common::packets::ack {
+					.block = data_packet.block
+				}, send_buffer.begin());
+			}
+
 			socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
-
 			if (data_packet.data.size() != 512) break;
-
 			bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 		}
 	}
