@@ -37,7 +37,8 @@ public:
 		std::ifstream file{fromPath};
 		if (!file && file.eof()) return;
 
-		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::wrq {
+		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::request {
+			.type = tftp_common::packets::request::type::write,
 			.filename = toPath,
 			.mode = transferMode
 		}, send_buffer.begin());
@@ -83,7 +84,8 @@ public:
 		std::ofstream file{toPath};
 		if (!file) return;
 
-		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::rrq {
+		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::request {
+			.type = tftp_common::packets::request::type::read,
 			.filename = fromPath,
 			.mode = transferMode
 		}, send_buffer.begin());
