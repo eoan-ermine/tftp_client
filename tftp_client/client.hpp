@@ -37,11 +37,9 @@ public:
 		std::ifstream file{fromPath};
 		if (!file && file.eof()) return;
 
-		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::request {
-			.type = tftp_common::packets::request::type::write,
-			.filename = toPath,
-			.mode = transferMode
-		}, send_buffer.begin());
+		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::request(
+			tftp_common::packets::request::type::write, toPath, transferMode
+		), send_buffer.begin());
 		socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
 		std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 
@@ -70,9 +68,9 @@ public:
 
 				file.read(reinterpret_cast<char*>(data_buffer.data()), 512);
 				data_buffer.resize(file.gcount());
-				packet_size = tftp_common::serialize({
-					.block = current_block, .data = std::move(data_buffer)
-				}, send_buffer.begin());
+				packet_size = tftp_common::serialize(tftp_common::packets::data(
+					current_block, std::move(data_buffer)
+				), send_buffer.begin());
 			}
 
 			socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
@@ -84,11 +82,9 @@ public:
 		std::ofstream file{toPath};
 		if (!file) return;
 
-		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::request {
-			.type = tftp_common::packets::request::type::read,
-			.filename = fromPath,
-			.mode = transferMode
-		}, send_buffer.begin());
+		std::size_t packet_size = tftp_common::serialize(tftp_common::packets::request(
+			tftp_common::packets::request::type::read, fromPath, transferMode
+		), send_buffer.begin());
 		socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
 		std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 
@@ -113,14 +109,12 @@ public:
 			if (data_packet.block == current_block) {
 				current_block += 1;
 
-				file.write(reinterpret_cast<char*>(data_packet.data.data()), data_packet.data.size());
-				packet_size = tftp_common::serialize(tftp_common::packets::ack {
-					.block = data_packet.block
-				}, send_buffer.begin());
+				file.write(reinterpret_cast<char*>(data_packet.data_.data()), data_packet.data_.size());
+				packet_size = tftp_common::serialize(tftp_common::packets::ack(data_packet.block), send_buffer.begin());
 			}
 
 			socket.send_to(boost::asio::buffer(send_buffer, packet_size), receiver_endpoint);
-			if (data_packet.data.size() != 512) break;
+			if (data_packet.data_.size() != 512) break;
 			bytesRead = socket.receive_from(boost::asio::buffer(recv_buffer), sender_endpoint);
 		}
 	}
