@@ -1,6 +1,10 @@
 #include <boost/asio.hpp>
 
-#include <tftp_common/tftp_common.hpp>
+#ifdef BUILD_EXAMPLES
+    #include "../../../tftp_common/tftp_common.hpp"
+#else
+    #include <tftp_common/tftp_common.hpp>
+#endif
 
 #include <cstdlib>
 #include <fstream>
