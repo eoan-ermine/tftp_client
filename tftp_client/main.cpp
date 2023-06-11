@@ -3,9 +3,11 @@
 
 #include "client.hpp"
 
+#include <string_view>
 #include <iostream>
 #include <cstdlib>
 
+using namespace tftp_common::packets;
 using boost::asio::ip::udp;
 namespace po = boost::program_options;
 
@@ -78,8 +80,8 @@ int main(int argc, char* argv[]) {
 		return EXIT_SUCCESS;
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
-	} catch (tftp_common::packets::error& err) {
-		std::cout << "Unexpected error: code = " << err.ErrorCode << ", message = " << err.ErrMsg << '\n';
+	} catch (Error& err) {
+		std::cout << "Unexpected error: code = " << err.getErrorCode() << ", message = " << err.getErrorMessage() << '\n';
 	}
 
 	return EXIT_FAILURE;
