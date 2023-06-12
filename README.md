@@ -1,9 +1,9 @@
 # TFTP Client
 
-## Использование
+## Usage
 
 ```
-tftp_client host [GET | PUT] source [destination]
+tftp_client host [GET | PUT] source destination
 ```
 
 | | |
@@ -14,18 +14,18 @@ tftp_client host [GET | PUT] source [destination]
 | source | Specifies the file to transfer |
 | destination | Specifies where to transfer the file |
 
-## Реализованные возможности ([RFC 1350](https://tools.ietf.org/html/rfc1350))
+## Implemented features ([RFC 1350](https://datatracker.ietf.org/doc/html/rfc1350))
 
-| Возможность | Статус реализации |
+| Feature | Implementation status |
 | ----------- | ----------------- |
-| READ запросы | ${\color{green}\text{Реализовано}}$ |
-| WRITE запросы | ${\color{green}\text{Реализовано}}$ |
+| READ requests | ${\color{green}\text{Done}}$ |
+| Write requests | ${\color{green}\text{Done}}$ |
 
-## Поддержка расширений
+## Extensions support
 
-| Расширение | Статус реализации |
+| Extension | Implementation status |
 | ----------- | ----------------- |
-| [RFC 2347: TFTP Option Extension](https://www.rfc-editor.org/rfc/rfc2347) | ${\color{red}\text{Не реализовано}}$ |
-| [RFC 2348: TFTP Blocksize Option](https://www.rfc-editor.org/rfc/rfc2347) | ${\color{red}\text{Не реализовано}}$ |
-| [RFC 2349: TFTP Timeout Interval and Transfer Size Options](https://www.rfc-editor.org/rfc/rfc2347) | ${\color{red}\text{Не реализовано}}$ |
-| [RFC 7440: TFTP Windowsize Option](https://www.rfc-editor.org/rfc/rfc7440) | ${\color{red}\text{Не реализовано}}$ |
+| [RFC 2347: TFTP Option Extension](https://datatracker.ietf.org/doc/html/rfc2347) | ${\color{red}\text{TODO}}$ |
+| [RFC 2348: TFTP Blocksize Option](https://datatracker.ietf.org/doc/html/rfc2348) | ${\color{red}\text{TODO}}$ |
+| [RFC 2349: TFTP Timeout Interval and Transfer Size Options](https://datatracker.ietf.org/doc/html/rfc2349) | ${\color{red}\text{TODO}}$ |
+| [RFC 7440: TFTP Windowsize Option](https://datatracker.ietf.org/doc/html/rfc7440) | ${\color{red}\text{TODO}}$ |
