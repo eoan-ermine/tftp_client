@@ -32,12 +32,12 @@ std::istream &operator>>(std::istream &stream, method &object) {
 int main(int argc, char *argv[]) {
     if (argc <= 4) {
         std::cout
-            << "Usage: tftp_client host [GET | PUT] source destination [--option_name name --option_value value]..."
+            << "Usage: tftp_client host [GET | PUT] source destination [--transfer_mode [netascii | octet]] [--option_name name --option_value value]..."
             << '\n';
         return EXIT_FAILURE;
     }
 
-    std::string host, source, destination;
+    std::string host, source, destination, transfer_mode;
     tftp_client::method method;
     std::vector<std::string> option_names, option_values;
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
         ("source,s", po::value<std::string>(&source), "specifies the file to transfer")
         ("method,m", po::value<tftp_client::method>(&method), "method [GET | PUT]")
         ("destination,d", po::value<std::string>(&destination), "specifies where to transfer the file")
+        ("transfer_mode,t", po::value<std::string>(&transfer_mode), "transfer mode [netascii | octet]")
         ("option_name,n", po::value<std::vector<std::string>>(&option_names), "option name")
         ("option_value,v", po::value<std::vector<std::string>>(&option_values), "option value");
     // clang-format on
@@ -75,9 +76,9 @@ int main(int argc, char *argv[]) {
         tftp_client::TFTPClient client(resolver, receiver_endpoint, socket);
 
         if (method == tftp_client::method::PUT) {
-            client.send(source, destination, "octet", option_names, option_values);
+            client.send(source, destination, transfer_mode, option_names, option_values);
         } else if (method == tftp_client::method::GET) {
-            client.read(source, destination, "octet", option_names, option_values);
+            client.read(source, destination, transfer_mode, option_names, option_values);
         }
 
         return EXIT_SUCCESS;

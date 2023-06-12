@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-tftp_client host [GET | PUT] source destination [--option_name name --option_value value]...
+tftp_client host [GET | PUT] source destination [--transfer_mode [netascii | octet]] [--option_name name --option_value value]...
 ```
 
 | | |
