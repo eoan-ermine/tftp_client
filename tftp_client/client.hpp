@@ -43,14 +43,23 @@ class TFTPClient {
         recvBuffer.resize(1024);
     }
 
-    void send(std::string fromPath, std::string toPath, std::string transferMode) {
+    void send(std::string fromPath, std::string toPath, std::string transferMode,
+              const std::vector<std::string> &optionsNames, const std::vector<std::string> &optionsValues) {
         std::ifstream file{fromPath};
         if (!file && file.eof())
             return;
 
-        std::size_t packetSize = Request(Type::WriteRequest, toPath, transferMode).serialize(sendBuffer.begin());
+        std::size_t packetSize = Request(Type::WriteRequest, toPath, transferMode, optionsNames, optionsValues)
+                                     .serialize(sendBuffer.begin());
         socket.send_to(boost::asio::buffer(sendBuffer, packetSize), receiverEndpoint);
         std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recvBuffer), senderEndpoint);
+
+        bool optionsSuccess = false;
+        if (optionsNames.size() > 0) {
+            OptionAcknowledgment optionAcknowledgmentPacket;
+            auto [success, _] = parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
+            optionsSuccess = success;
+        }
 
         std::string newPort = std::to_string(senderEndpoint.port());
         receiverEndpoint = *resolver.resolve(udp::v4(), receiverEndpoint.address().to_string(), newPort).begin();
@@ -87,17 +96,29 @@ class TFTPClient {
         }
     }
 
-    void read(std::string fromPath, std::string toPath, std::string transferMode) {
+    void read(std::string fromPath, std::string toPath, std::string transferMode,
+              const std::vector<std::string> &optionsNames, const std::vector<std::string> &optionsValues) {
         std::ofstream file{toPath};
         if (!file)
             return;
 
-        std::size_t packetSize = Request(Type::ReadRequest, fromPath, transferMode).serialize(sendBuffer.begin());
+        std::size_t packetSize = Request(Type::ReadRequest, fromPath, transferMode, optionsNames, optionsValues)
+                                     .serialize(sendBuffer.begin());
         socket.send_to(boost::asio::buffer(sendBuffer, packetSize), receiverEndpoint);
-
         std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recvBuffer), senderEndpoint);
+
+        bool optionsSuccess = false;
+        if (optionsNames.size() > 0) {
+            OptionAcknowledgment optionAcknowledgmentPacket;
+            auto [success, _] = parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
+            optionsSuccess = success;
+        }
+
         std::string newPort = std::to_string(senderEndpoint.port());
         receiverEndpoint = *resolver.resolve(udp::v4(), receiverEndpoint.address().to_string(), newPort).begin();
+
+        if (optionsSuccess)
+            bytesRead = socket.receive_from(boost::asio::buffer(recvBuffer), senderEndpoint);
 
         Data dataPacket;
         uint16_t currentBlock = 1;

@@ -31,12 +31,15 @@ std::istream &operator>>(std::istream &stream, method &object) {
 
 int main(int argc, char *argv[]) {
     if (argc <= 4) {
-        std::cout << "Usage: tftp_client host [GET | PUT] source [destination]" << '\n';
+        std::cout
+            << "Usage: tftp_client host [GET | PUT] source destination [--option_name name --option_value value]..."
+            << '\n';
         return EXIT_FAILURE;
     }
 
     std::string host, source, destination;
     tftp_client::method method;
+    std::vector<std::string> option_names, option_values;
 
     // clang-format off
     po::options_description desc("Allowed options");
@@ -45,7 +48,9 @@ int main(int argc, char *argv[]) {
         ("host,h", po::value<std::string>(&host), "specifies the local or remote host")
         ("source,s", po::value<std::string>(&source), "specifies the file to transfer")
         ("method,m", po::value<tftp_client::method>(&method), "method [GET | PUT]")
-        ("destination,d", po::value<std::string>(&destination), "specifies where to transfer the file");
+        ("destination,d", po::value<std::string>(&destination), "specifies where to transfer the file")
+        ("option_name,n", po::value<std::vector<std::string>>(&option_names), "option name")
+        ("option_value,v", po::value<std::vector<std::string>>(&option_values), "option value");
     // clang-format on
 
     po::positional_options_description pos_opts_desc;
@@ -55,7 +60,7 @@ int main(int argc, char *argv[]) {
     po::store(po::command_line_parser(argc, argv).options(desc).positional(pos_opts_desc).run(), vm);
     po::notify(vm);
 
-    if (vm.count("help")) {
+    if (vm.count("help") || option_names.size() != option_values.size()) {
         std::cout << desc << '\n';
         return EXIT_SUCCESS;
     }
@@ -70,9 +75,9 @@ int main(int argc, char *argv[]) {
         tftp_client::TFTPClient client(resolver, receiver_endpoint, socket);
 
         if (method == tftp_client::method::PUT) {
-            client.send(source, destination, "octet");
+            client.send(source, destination, "octet", option_names, option_values);
         } else if (method == tftp_client::method::GET) {
-            client.read(source, destination, "octet");
+            client.read(source, destination, "octet", option_names, option_values);
         }
 
         return EXIT_SUCCESS;

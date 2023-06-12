@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-tftp_client host [GET | PUT] source destination
+tftp_client host [GET | PUT] source destination [--option_name name --option_value value]...
 ```
 
 | | |
@@ -25,7 +25,7 @@ tftp_client host [GET | PUT] source destination
 
 | Extension | Implementation status |
 | ----------- | ----------------- |
-| [RFC 2347: TFTP Option Extension](https://datatracker.ietf.org/doc/html/rfc2347) | ${\color{red}\text{TODO}}$ |
+| [RFC 2347: TFTP Option Extension](https://datatracker.ietf.org/doc/html/rfc2347) | ${\color{green}\text{Done}}$ |
 | [RFC 2348: TFTP Blocksize Option](https://datatracker.ietf.org/doc/html/rfc2348) | ${\color{red}\text{TODO}}$ |
 | [RFC 2349: TFTP Timeout Interval and Transfer Size Options](https://datatracker.ietf.org/doc/html/rfc2349) | ${\color{red}\text{TODO}}$ |
 | [RFC 7440: TFTP Windowsize Option](https://datatracker.ietf.org/doc/html/rfc7440) | ${\color{red}\text{TODO}}$ |
