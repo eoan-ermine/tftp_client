@@ -16,9 +16,9 @@ using boost::asio::ip::udp;
 
 namespace tftp_client {
 
-template <typename Packet, typename ParseFunction>
-bool try_parse(std::uint8_t *data, std::size_t len, Packet &packet, ParseFunction parseFunction) {
-    bool result = parseFunction(data, len, packet);
+template <typename Packet>
+bool try_parse(std::uint8_t *data, std::size_t len, Packet &packet) {
+    auto [result, _] = parse(data, len, packet);
     if (result)
         return true;
     else {
@@ -57,7 +57,7 @@ class TFTPClient {
         bool optionsSuccess = false;
         if (optionsNames.size() > 0) {
             OptionAcknowledgment optionAcknowledgmentPacket;
-            auto [success, _] = parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
+            bool success = try_parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
             optionsSuccess = success;
         }
 
@@ -69,12 +69,7 @@ class TFTPClient {
         uint16_t currentBlock = 0;
 
         while (file && !file.eof()) {
-            try_parse(recvBuffer.data(), bytesRead, acknowledgmentPacket,
-                      [&](std::uint8_t *data, std::size_t len, auto &packet) {
-                          auto [success, _] = parse(data, len, packet);
-                          return success;
-                      });
-
+            try_parse(recvBuffer.data(), bytesRead, acknowledgmentPacket);
             std::vector<std::uint8_t> dataBuffer(512);
             std::size_t packetSize;
 
@@ -110,7 +105,7 @@ class TFTPClient {
         bool optionsSuccess = false;
         if (optionsNames.size() > 0) {
             OptionAcknowledgment optionAcknowledgmentPacket;
-            auto [success, _] = parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
+            bool success = try_parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
             optionsSuccess = success;
         }
 
@@ -124,11 +119,7 @@ class TFTPClient {
         uint16_t currentBlock = 1;
 
         while (true) {
-            try_parse(recvBuffer.data(), bytesRead, dataPacket, [&](std::uint8_t *data, std::size_t len, auto &packet) {
-                auto [success, _] = parse(data, len, packet);
-                return success;
-            });
-
+            try_parse(recvBuffer.data(), bytesRead, dataPacket);
             const auto &packetData = dataPacket.getData();
             std::size_t packetSize;
 
