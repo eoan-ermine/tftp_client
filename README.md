@@ -13,6 +13,9 @@ tftp_client host [GET | PUT] source destination [--transfer_mode [netascii | oct
 | PUT | Transfers the file source on the local host to the file destination on the remote host |
 | source | Specifies the file to transfer |
 | destination | Specifies where to transfer the file |
+| transfer_mode | Specifies the transfer mode, possible values: netascii, octet |
+| option_name | Specifies the name of the option, may be repeated |
+| option_value | Specifies the value of the option, may be repeated |
 
 ## Implemented features ([RFC 1350](https://datatracker.ietf.org/doc/html/rfc1350))
 
