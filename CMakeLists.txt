@@ -9,10 +9,7 @@ if (NOT tftp_common_FOUND)
 
 	FetchContent_Declare(
 	  tftp_common
-	  GIT_REPOSITORY https://github.com/eoan-ermine/tftp_common
-	  GIT_TAG 1e869d41aa5d243d26761df154dd17a56991ea4a # 1.1.0
-	  CONFIGURE_COMMAND ""
-	  BUILD_COMMAND ""
+	  URL https://github.com/eoan-ermine/tftp_common/archive/refs/tags/v1.1.0.zip
 	)
 
 	FetchContent_GetProperties(tftp_common)
