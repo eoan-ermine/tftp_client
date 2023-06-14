@@ -31,9 +31,9 @@ std::istream &operator>>(std::istream &stream, method &object) {
 
 int main(int argc, char *argv[]) {
     if (argc <= 4) {
-        std::cout
-            << "Usage: tftp_client host [GET | PUT] source destination [--transfer_mode [netascii | octet]] [--option_name name --option_value value]..."
-            << '\n';
+        std::cout << "Usage: tftp_client host [GET | PUT] source destination [--transfer_mode [netascii | octet]] "
+                     "[--option_name name --option_value value]..."
+                  << '\n';
         return EXIT_FAILURE;
     }
 

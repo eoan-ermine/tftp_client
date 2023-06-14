@@ -6,19 +6,18 @@
 #include <tftp_common/tftp_common.hpp>
 #endif
 
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <algorithm>
 
 using namespace tftp_common::packets;
 using boost::asio::ip::udp;
 
 namespace tftp_client {
 
-template <typename Packet>
-bool try_parse(std::uint8_t *data, std::size_t len, Packet &packet) {
+template <typename Packet> bool try_parse(std::uint8_t *data, std::size_t len, Packet &packet) {
     auto [result, _] = parse(data, len, packet);
     if (result)
         return true;
@@ -38,8 +37,8 @@ class TFTPClient {
     std::vector<std::uint8_t> sendBuffer, recvBuffer;
     std::size_t blockSize = 512;
 
-    std::size_t getBlockSize(const OptionAcknowledgment& packet) const {
-        const auto& Options = packet.getOptions();
+    std::size_t getBlockSize(const OptionAcknowledgment &packet) const {
+        const auto &Options = packet.getOptions();
         if (Options.count("blksize") != 0) {
             return std::atoi(packet.getOptionValue("blksize").data());
         }
