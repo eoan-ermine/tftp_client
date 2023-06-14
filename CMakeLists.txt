@@ -16,12 +16,12 @@ if (NOT tftp_common_FOUND)
 	if (NOT tftp_common_POPULATED)
 		FetchContent_Populate(tftp_common)
 	endif()
-
-	add_library(tftp_common INTERFACE)
-	target_include_directories(tftp_common INTERFACE ${tftp_common_SOURCE_DIR})
 endif()
+
+add_library(tftp_common INTERFACE)
+target_include_directories(tftp_common INTERFACE ${tftp_common_SOURCE_DIR})
 
 find_package(Boost 1.74 COMPONENTS program_options system REQUIRED)
 
 add_executable(tftp_client tftp_client/main.cpp)
-target_link_libraries(tftp_client tftp_common Boost::program_options Boost::system)
+target_link_libraries(tftp_client Boost::program_options Boost::system)
