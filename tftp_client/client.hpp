@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 using namespace tftp_common::packets;
 using boost::asio::ip::udp;
@@ -35,12 +36,21 @@ class TFTPClient {
     udp::endpoint &receiverEndpoint, senderEndpoint;
     udp::socket &socket;
     std::vector<std::uint8_t> sendBuffer, recvBuffer;
+    std::size_t blockSize = 512;
+
+    std::size_t getBlockSize(const OptionAcknowledgment& packet) const {
+        const auto& Options = packet.getOptions();
+        if (Options.count("blksize") != 0) {
+            return std::atoi(packet.getOptionValue("blksize").data());
+        }
+        return 512;
+    }
 
   public:
     TFTPClient(udp::resolver &resolver, udp::endpoint &receiverEndpoint, udp::socket &socket)
         : resolver(resolver), receiverEndpoint(receiverEndpoint), socket(socket) {
-        sendBuffer.resize(1024);
-        recvBuffer.resize(1024);
+        sendBuffer.resize(2 * blockSize);
+        recvBuffer.resize(2 * blockSize);
     }
 
     void send(std::string fromPath, std::string toPath, std::string transferMode,
@@ -57,8 +67,10 @@ class TFTPClient {
         bool optionsSuccess = false;
         if (optionsNames.size() > 0) {
             OptionAcknowledgment optionAcknowledgmentPacket;
-            bool success = try_parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
-            optionsSuccess = success;
+            optionsSuccess = try_parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
+
+            if (optionsSuccess)
+                blockSize = getBlockSize(optionAcknowledgmentPacket);
         }
 
         std::string newPort = std::to_string(senderEndpoint.port());
@@ -70,7 +82,7 @@ class TFTPClient {
 
         while (file && !file.eof()) {
             try_parse(recvBuffer.data(), bytesRead, acknowledgmentPacket);
-            std::vector<std::uint8_t> dataBuffer(512);
+            std::vector<std::uint8_t> dataBuffer(blockSize);
             std::size_t packetSize;
 
             /*
@@ -81,7 +93,7 @@ class TFTPClient {
             if (acknowledgmentPacket.getBlock() == currentBlock) {
                 currentBlock += 1;
 
-                file.read(reinterpret_cast<char *>(dataBuffer.data()), 512);
+                file.read(reinterpret_cast<char *>(dataBuffer.data()), blockSize);
                 dataBuffer.resize(file.gcount());
                 packetSize = Data(currentBlock, std::move(dataBuffer)).serialize(sendBuffer.begin());
             }
@@ -105,8 +117,10 @@ class TFTPClient {
         bool optionsSuccess = false;
         if (optionsNames.size() > 0) {
             OptionAcknowledgment optionAcknowledgmentPacket;
-            bool success = try_parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
-            optionsSuccess = success;
+            optionsSuccess = try_parse(recvBuffer.data(), bytesRead, optionAcknowledgmentPacket);
+
+            if (optionsSuccess)
+                blockSize = getBlockSize(optionAcknowledgmentPacket);
         }
 
         std::string newPort = std::to_string(senderEndpoint.port());
@@ -135,7 +149,7 @@ class TFTPClient {
             }
 
             socket.send_to(boost::asio::buffer(sendBuffer, packetSize), receiverEndpoint);
-            if (packetData.size() != 512)
+            if (packetData.size() != blockSize)
                 break;
             bytesRead = socket.receive_from(boost::asio::buffer(recvBuffer), senderEndpoint);
         }
