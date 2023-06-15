@@ -9,7 +9,7 @@ A simple Trivial File Transfer Protocol (TFTP) client.
 | Dependency name         | Minimum required version | Ubuntu 22.04                         |
 |-------------------------|--------------------------|--------------------------------------|
 | C++                     | C++17                    | sudo apt-get install build-essential |
-| tftp_common             | 1.1.0                    | ---                                  |
+| tftp_common             | 1.2.0                    | ---                                  |
 | Boost.System, Boost.Program_Options | 1.74         | sudo apt install libboost-system-dev libboost-program-options-dev |
 
 ## Usage
