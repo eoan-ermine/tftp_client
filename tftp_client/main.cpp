@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string_view>
 
-using namespace tftp_common::packets;
+using namespace tftp::packets;
 using boost::asio::ip::udp;
 namespace po = boost::program_options;
 

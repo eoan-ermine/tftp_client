@@ -4,24 +4,24 @@ project(tftp_client)
 
 add_executable(tftp_client tftp_client/main.cpp)
 
-find_package(tftp_common 1.2.0)
+find_package(tftp 1.2.0)
 
-if (NOT tftp_common_FOUND)
+if (NOT tftp_FOUND)
 	include(FetchContent)
 
 	FetchContent_Declare(
-	  tftp_common
-	  URL https://github.com/eoan-ermine/tftp_common/archive/refs/tags/v1.2.0.zip
+	  tftp
+	  URL https://github.com/eoan-ermine/tftp/archive/refs/tags/v1.2.0.zip
 	)
 
-	FetchContent_GetProperties(tftp_common)
-	if (NOT tftp_common_POPULATED)
-		FetchContent_Populate(tftp_common)
+	FetchContent_GetProperties(tftp)
+	if (NOT tftp_POPULATED)
+		FetchContent_Populate(tftp)
 	endif()
 
-	add_library(tftp_common INTERFACE)
-	target_include_directories(tftp_common INTERFACE ${tftp_common_SOURCE_DIR})
-	target_link_libraries(tftp_client tftp_common)
+	add_library(tftp INTERFACE)
+	target_include_directories(tftp INTERFACE ${tftp_SOURCE_DIR})
+	target_link_libraries(tftp_client tftp)
 endif()
 
 

@@ -8,9 +8,9 @@ A simple Trivial File Transfer Protocol (TFTP) client.
 
 | Dependency name         | Minimum required version | Ubuntu 22.04                         |
 |-------------------------|--------------------------|--------------------------------------|
-| C++                     | C++17                    | sudo apt-get install build-essential |
-| tftp_common             | 1.2.0                    | ---                                  |
-| Boost.System, Boost.Program_Options | 1.74         | sudo apt install libboost-system-dev libboost-program-options-dev |
+| C++ | C++17 | sudo apt-get install build-essential |
+| tftp | [1efbec0864324e1dc18bb6879eff2b7c60aba6b4](https://github.com/eoan-ermine/tftp/commit/1efbec0864324e1dc18bb6879eff2b7c60aba6b4) | --- |
+| Boost.System, Boost.Program_Options | 1.74 | sudo apt install libboost-system-dev libboost-program-options-dev |
 
 ## Usage
 
@@ -41,6 +41,6 @@ tftp_client host [GET | PUT] source destination [--transfer_mode [netascii | oct
 | Extension | Implementation status |
 | ----------- | ----------------- |
 | [RFC 2347: TFTP Option Extension](https://datatracker.ietf.org/doc/html/rfc2347) | ${\color{green}\text{Done}}$ |
-| [RFC 2348: TFTP Blocksize Option](https://datatracker.ietf.org/doc/html/rfc2348) | ${\color{red}\text{Done}}$ |
+| [RFC 2348: TFTP Blocksize Option](https://datatracker.ietf.org/doc/html/rfc2348) | ${\color{green}\text{Done}}$ |
 | [RFC 2349: TFTP Timeout Interval and Transfer Size Options](https://datatracker.ietf.org/doc/html/rfc2349) | ${\color{red}\text{TODO}}$ |
 | [RFC 7440: TFTP Windowsize Option](https://datatracker.ietf.org/doc/html/rfc7440) | ${\color{red}\text{TODO}}$ |

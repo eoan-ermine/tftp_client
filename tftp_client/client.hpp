@@ -1,10 +1,6 @@
 #include <boost/asio.hpp>
 
-#ifdef BUILD_EXAMPLES
-#include "../../../tftp_common/tftp_common.hpp"
-#else
-#include <tftp_common/tftp_common.hpp>
-#endif
+#include <tftp/tftp.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -12,19 +8,21 @@
 #include <iostream>
 #include <string>
 
-using namespace tftp_common::packets;
+using namespace tftp::packets;
 using boost::asio::ip::udp;
 
 namespace tftp_client {
 
 template <typename Packet> bool try_parse(std::uint8_t *data, std::size_t len, Packet &packet) {
-    auto [result, _] = parse(data, len, packet);
-    if (result)
+    auto result = Parser<Packet>::parse(data, len);
+    packet = std::move(result.get().Packet);
+
+    if (result.isSuccess())
         return true;
     else {
         Error errPacket;
-        auto [result, _] = parse(data, len, errPacket);
-        if (result)
+        auto result = Parser<Error>::parse(data, len);
+        if (result.isSuccess())
             throw errPacket;
     }
     return false;
@@ -38,8 +36,7 @@ class TFTPClient {
     std::size_t blockSize = 512;
 
     std::size_t getBlockSize(const OptionAcknowledgment &packet) const {
-        const auto &Options = packet.getOptions();
-        if (Options.count("blksize") != 0) {
+        if (packet.hasOption("blksize")) {
             return std::atoi(packet.getOptionValue("blksize").data());
         }
         return 512;
@@ -58,7 +55,7 @@ class TFTPClient {
         if (!file && file.eof())
             return;
 
-        std::size_t packetSize = Request(Type::WriteRequest, toPath, transferMode, optionsNames, optionsValues)
+        std::size_t packetSize = Request(tftp::packets::types::Type::WriteRequest, toPath, transferMode, optionsNames, optionsValues)
                                      .serialize(sendBuffer.begin());
         socket.send_to(boost::asio::buffer(sendBuffer, packetSize), receiverEndpoint);
         std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recvBuffer), senderEndpoint);
@@ -108,7 +105,7 @@ class TFTPClient {
         if (!file)
             return;
 
-        std::size_t packetSize = Request(Type::ReadRequest, fromPath, transferMode, optionsNames, optionsValues)
+        std::size_t packetSize = Request(tftp::packets::types::Type::ReadRequest, fromPath, transferMode, optionsNames, optionsValues)
                                      .serialize(sendBuffer.begin());
         socket.send_to(boost::asio::buffer(sendBuffer, packetSize), receiverEndpoint);
         std::size_t bytesRead = socket.receive_from(boost::asio::buffer(recvBuffer), senderEndpoint);
